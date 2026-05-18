@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wellbeing Timeline · Rivia 2025–2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: oklch(0.985 0.004 80);
+    --bg-soft: oklch(0.965 0.006 80);
+    --ink: oklch(0.18 0.012 80);
+    --ink-soft: oklch(0.42 0.012 80);
+    --ink-mute: oklch(0.58 0.01 80);
+    --line: oklch(0.88 0.008 80);
+    --line-soft: oklch(0.93 0.006 80);
+    --card: oklch(0.995 0.003 80);
+    --accent-done: oklch(0.55 0.09 165);
+    --accent-done-soft: oklch(0.95 0.025 165);
+    --accent-pending: oklch(0.68 0.13 65);
+    --accent-pending-soft: oklch(0.96 0.04 75);
+    --shadow: 0 1px 2px oklch(0.2 0.01 80 / 0.04), 0 4px 16px oklch(0.2 0.01 80 / 0.04);
+    --shadow-hover: 0 1px 2px oklch(0.2 0.01 80 / 0.06), 0 8px 24px oklch(0.2 0.01 80 / 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: "ss01"; }
+
+  /* ---------- Page header ---------- */
+  header.page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 56px 48px 24px;
+  }
+
+  header.page .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    margin-bottom: 16px;
+  }
+
+  header.page h1 {
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    max-width: 780px;
+  }
+
+  header.page h1 em {
+    font-style: normal;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  header.page .lede {
+    color: var(--ink-soft);
+    font-size: 17px;
+    max-width: 720px;
+    line-height: 1.55;
+    margin-bottom: 32px;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent-done);
+    box-shadow: 0 0 0 3px var(--accent-done-soft);
+  }
+  .legend-dot.pending {
+    background: var(--accent-pending);
+    box-shadow: 0 0 0 3px var(--accent-pending-soft);
+  }
+
+  .controls {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .controls button {
+    font-family: inherit;
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .controls button:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+  .phase-nav {
+    display: flex;
+    gap: 4px;
+    margin: 24px 0 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .phase-nav::-webkit-scrollbar { display: none; }
+
+  .phase-nav button {
+    font-family: inherit;
+    font-size: 13px;
+    background: transparent;
+    border: none;
+    padding: 8px 14px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .phase-nav button:hover { color: var(--ink); background: var(--bg-soft); }
+  .phase-nav button .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+
+  /* ---------- Timeline ---------- */
+  .timeline-wrap {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 32px 0 56px;
+    scroll-snap-type: x proximity;
+  }
+
+  .timeline-wrap::-webkit-scrollbar { height: 10px; }
+  .timeline-wrap::-webkit-scrollbar-track { background: transparent; }
+  .timeline-wrap::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 999px;
+  }
+  .timeline-wrap::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: 48px 600px 1380px 660px 440px 80px;
+    align-items: stretch;
+    position: relative;
+    padding: 0;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .phase {
+    position: relative;
+    padding: 0 24px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phase-header {
+    text-align: center;
+    padding: 0 0 8px;
+  }
+
+  .phase-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+  }
+
+  .phase-title {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .phase-dates {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.02em;
+  }
+
+  .phase-situation {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .phase-situation strong {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  /* Timeline track */
+  .track {
+    position: relative;
+    height: 320px;
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .track::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    right: -24px;
+    top: 50%;
+    height: 1px;
+    background: var(--ink);
+    transform: translateY(-0.5px);
+  }
+
+  /* end arrow on last phase */
+  .phase:last-of-type .track::after {
+    content: '';
+    position: absolute;
+    right: -32px;
+    top: 50%;
+    width: 0; height: 0;
+    border-left: 8px solid var(--ink);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transform: translateY(-50%);
+  }
+
+  /* phase divider tick */
+  .phase:not(:last-of-type) .track .tick-divider {
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    width: 1px; height: 10px;
+    background: var(--ink);
+    transform: translateY(-50%);
+  }
+
+  .markers {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 8px;
+  }
+
+  .markers.above {
+    height: 50%;
+    align-items: flex-end;
+  }
+  .markers.below {
+    height: 50%;
+    align-items: flex-start;
+  }
+
+  /* ---------- Dynamic marker ---------- */
+  .dynamic {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .dynamic .stem {
+    width: 1px;
+    background: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .markers.above .dynamic { flex-direction: column; justify-content: flex-end; }
+  .markers.above .dynamic .stem-wrap { display: flex; flex-direction: column; align-items: center; }
+  .markers.above .dynamic .stem { height: 14px; margin-top: 2px; }
+  .markers.above .dynamic:nth-child(even) .stem { height: 56px; }
+  .markers.above .dynamic:nth-child(3n) .stem { height: 32px; }
+
+  .markers.below .dynamic { flex-direction: column-reverse; justify-content: flex-end; }
+  .markers.below .dynamic .stem-wrap { display: flex; flex-direction: column-reverse; align-items: center; }
+  .markers.below .dynamic .stem { height: 14px; margin-bottom: 2px; }
+  .markers.below .dynamic:nth-child(even) .stem { height: 56px; }
+  .markers.below .dynamic:nth-child(3n) .stem { height: 32px; }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1.5px solid var(--accent-done);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+    transition: all 0.2s ease;
+  }
+  .dynamic.pending .dot { border-color: var(--accent-pending); }
+  .dynamic:hover .dot {
+    box-shadow: 0 0 0 4px var(--accent-done-soft);
+    transform: scale(1.15);
+  }
+  .dynamic.pending:hover .dot {
+    box-shadow: 0 0 0 4px var(--accent-pending-soft);
+  }
+
+  .label {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 10px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    min-width: 96px;
+    max-width: 140px;
+    transition: all 0.2s ease;
+  }
+  .dynamic:hover .label {
+    border-color: var(--ink-soft);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+  }
+  .markers.below .dynamic:hover .label {
+    transform: translateY(1px);
+  }
+  .dynamic.pending .label {
+    background: var(--accent-pending-soft);
+    border-color: var(--accent-pending);
+    border-style: dashed;
+  }
+
+  .label .label-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  .label .label-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .label .pending-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-pending);
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* ---------- Detail panel ---------- */
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: oklch(0.2 0.01 80 / 0.35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 50;
+  }
+  .detail-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .detail-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(560px, 92vw);
+    background: var(--card);
+    box-shadow: -16px 0 48px oklch(0.2 0.01 80 / 0.15);
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0.2, 1);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .detail-panel.open { transform: translateX(0); }
+
+  .detail-head {
+    padding: 28px 36px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .detail-head .meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+  }
+  .detail-head .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    background: var(--accent-done-soft);
+    color: var(--accent-done);
+  }
+  .detail-head .status.pending {
+    background: var(--accent-pending-soft);
+    color: var(--accent-pending);
+  }
+  .detail-head .status::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  .detail-head h2 {
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .detail-head .phase-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 36px 40px;
+  }
+  .detail-body section + section { margin-top: 24px; }
+  .detail-body h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .detail-body p {
+    color: var(--ink-soft);
+    line-height: 1.65;
+    font-size: 14.5px;
+  }
+  .detail-body p + p { margin-top: 12px; }
+  .detail-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .detail-body ul li {
+    position: relative;
+    padding-left: 20px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    font-size: 14.5px;
+    margin-bottom: 8px;
+  }
+  .detail-body ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 11px;
+    width: 8px; height: 1px;
+    background: var(--ink-mute);
+  }
+  .detail-body blockquote {
+    border-left: 2px solid var(--accent-done);
+    padding: 6px 0 6px 16px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: var(--bg-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .stat .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .stat .stat-delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-done);
+    margin-left: 6px;
+  }
+  .stat .stat-label {
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 32px; height: 32px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+    transition: all 0.15s ease;
+  }
+  .close-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .close-btn svg { width: 14px; height: 14px; }
+
+  /* phase pre-line (the line going into the first phase) */
+  .timeline > .pre-line, .timeline > .post-line {
+    position: relative;
+  }
+  .timeline > .pre-line::before {
+    content: '';
+    position: absolute;
+    top: calc(50% + 12px);
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--ink);
+    margin-top: 140px;
+  }
+
+  /* Footer */
+  footer.page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 48px 64px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-mute);
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  footer.page .mono { font-size: 11px; }
+
+  /* scroll hint */
+  .scroll-hint {
+    position: absolute;
+    right: 16px;
+    top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .scroll-hint .arrow { animation: nudge 1.8s ease-in-out infinite; }
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
+  }
+
+  @media (max-width: 720px) {
+    header.page { padding: 32px 24px 16px; }
+    header.page h1 { font-size: 30px; }
+    header.page .lede { font-size: 15px; }
+    footer.page { padding: 20px 24px 40px; }
+    .detail-head { padding: 24px 24px 18px; }
+    .detail-body { padding: 20px 24px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="kicker">Rivia · Wellbeing Lead Report</div>
+  <h1>Un año de Wellbeing <em>alrededor de la Learning Journey.</em></h1>
+  <p class="lede">Cronología de las dinámicas que hemos diseñado y ejecutado desde el equipo de Wellbeing, organizadas según las situaciones que vivió el equipo antes, durante y después de los tres meses en India y Corea. Haz click en cualquier marca del timeline para ver el detalle.</p>
+
+  <div class="toolbar">
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot"></span><span>Completado</span></div>
+      <div class="legend-item"><span class="legend-dot pending"></span><span>Por hacer</span></div>
+    </div>
+    <div class="controls">
+      <button id="expandAll" type="button">Expandir todo</button>
+      <button id="resetView" type="button">Volver al inicio</button>
+    </div>
+  </div>
+
+  <nav class="phase-nav" id="phaseNav">
+    <button data-target="phase-1" type="button">Antes de la LJ <span class="count mono">·08</span></button>
+    <button data-target="phase-2" type="button">Durante la LJ <span class="count mono">·18</span></button>
+    <button data-target="phase-3" type="button">Después de la LJ <span class="count mono">·07</span></button>
+    <button data-target="phase-4" type="button">Actualmente <span class="count mono">·04</span></button>
+  </nav>
+</header>
+
+<div class="timeline-wrap" id="timelineWrap">
+  <div class="scroll-hint"><span>scroll</span><span class="arrow">→</span></div>
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<footer class="page">
+  <div>Wellbeing Lead · Rivia · curso 2025–2026</div>
+  <div class="mono">37 dinámicas · 1 pendiente · noviembre 2025 → junio 2026</div>
+</footer>
+
+<!-- Detail panel -->
+<div class="detail-overlay" id="detailOverlay"></div>
+<aside class="detail-panel" id="detailPanel" aria-hidden="true">
+  <button class="close-btn" id="closeBtn" aria-label="Cerrar">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3 L13 13 M13 3 L3 13"/></svg>
+  </button>
+  <div class="detail-head" id="detailHead"></div>
+  <div class="detail-body" id="detailBody"></div>
+</aside>
+
+<script>
+// Datos del timeline de Wellbeing — Rivia 2025-2026
+// Estructura: fases con sus dinámicas en orden cronológico
+// side: above|below — posición respecto a la línea del timeline
+
+window.TIMELINE_DATA = {
+  phases: [
+    {
+      id: "phase-1",
+      label: "Fase 01",
+      title: "Antes de la LJ",
+      dates: "5 nov 2025 → 19 ene 2026",
+      situation: {
+        kicker: "Situación del equipo",
+        text: "Detectamos que los miembros del equipo no eran muy conscientes del rol que tenía cada uno ni de lo que queríamos desarrollar como liderazgos. Además, había que prepararse cultural y profesionalmente para los tres meses fuera, y diseñar la convivencia de los pisos como bloque de bienestar."
+      },
+      dynamics: [
+        {
+          name: "Estrategia con el equipo de Bienestar",
+          date: "5 nov 2025",
+          side: "above",
+          status: "done",
+          tags: ["Co-living", "Estrategia"],
+          description: "Primera sesión dedicada a aterrizar la estrategia de Wellbeing para todo el curso. Definimos los bloques de trabajo (cultura, co-living, profesionalismo, personal cultivation) y los indicadores que íbamos a poder medir en cada uno antes, durante y después del viaje.",
+          highlights: [
+            "Mapa de bloques de bienestar y responsables.",
+            "Indicadores por bloque (limpieza, rutinas, validación cultural).",
+            "Calendario de checkpoints atado al ILC y al TLC."
+          ]
+        },
+        {
+          name: "Dinámica de Pre-juicios",
+          date: "13 nov 2025",
+          side: "below",
+          status: "done",
+          tags: ["Cultura", "Liderada por María"],
+          description: "Trabajamos los prejuicios que el equipo traía sobre India y Corea antes de viajar. Sirvió para nombrar estereotipos, contrastarlos con datos reales y entrar al viaje con menos filtros culturales.",
+          highlights: [
+            "Identificación colectiva de prejuicios sobre los dos países.",
+            "Conversación abierta sobre interseccionalidad y privilegio.",
+            "Base para los equipos de investigación cultural posteriores."
+          ]
+        },
+        {
+          name: "I.L.C — Individual Learning Contract",
+          date: "18 nov 2025",
+          side: "above",
+          status: "done",
+          tags: ["Pre-work", "Autoconocimiento"],
+          description: "Cada persona del equipo definió su contrato de aprendizaje individual: qué quería desarrollar, qué retos personales se ponía y qué necesitaba del resto para conseguirlo. Fue el primer paso para que los liderazgos individuales fueran conscientes.",
+          highlights: [
+            "Reflexión individual sobre rol, fortalezas y áreas de mejora.",
+            "Compromisos personales firmados con el equipo.",
+            "Insumo directo para la Dinámica de Roles de Liderazgo posterior."
+          ]
+        },
+        {
+          name: "TS con Irún",
+          date: "3 dic 2025",
+          side: "below",
+          status: "done",
+          tags: ["Pre-work", "Alineación"],
+          description: "Sesión de trabajo con el equipo de Irún para alinear objetivos, retos de proyectos y expectativas antes del viaje. Buscábamos cerrar cabos antes de irnos tres meses fuera.",
+          highlights: [
+            "Cierre de CVs y proyectos abiertos.",
+            "Acuerdos de comunicación durante la LJ.",
+            "Alineación con la matriz Mondragón."
+          ]
+        },
+        {
+          name: "T.L.C — Team Learning Contract",
+          date: "11 dic 2025",
+          side: "above",
+          status: "done",
+          tags: ["Pre-work", "Equipo"],
+          description: "Versión colectiva del ILC. Definimos qué queríamos lograr como equipo en la LJ, cómo nos íbamos a tratar, qué prácticas íbamos a sostener y qué pasaría si no lo cumplíamos. Es el documento que después usamos como brújula durante el viaje.",
+          highlights: [
+            "Acuerdos de convivencia y trabajo.",
+            "Prácticas obligatorias (planes semanales, limpieza dominical).",
+            "Mecanismos de accountability del equipo."
+          ]
+        },
+        {
+          name: "Equipos de investigación cultural (India / Corea)",
+          date: "dic 2025 → ene 2026",
+          side: "below",
+          status: "done",
+          tags: ["Cultura", "Continuo · jueves"],
+          description: "Dos equipos paralelos, uno por país, investigando tendencias, idiomas, costumbres, planes y formas de acercarse a la gente local. Cada jueves dedicábamos un espacio en la TS al sharing.",
+          highlights: [
+            "Sesiones semanales en TS dedicadas a cultura.",
+            "Bases de costumbres, idiomas y networking local.",
+            "Reducción significativa del choque cultural a la llegada."
+          ]
+        },
+        {
+          name: "Sharing de Vestimenta y Profesionalismo",
+          date: "ene 2026",
+          side: "above",
+          status: "done",
+          tags: ["Profesionalismo"],
+          description: "Cada equipo país compartió qué códigos de vestimenta y profesionalismo se esperaban en los entornos a los que íbamos. Trabajamos también cómo queríamos ser percibidos como equipo y qué prácticas (puntualidad, lenguaje, presencia) íbamos a sostener.",
+          highlights: [
+            "Códigos de vestimenta India vs. Corea.",
+            "Acuerdo sobre cómo queremos vernos como equipo.",
+            "Compromiso de puntualidad y presencia profesional."
+          ]
+        },
+        {
+          name: "Co-creación de Rutinas de Bienestar",
+          date: "ene 2026",
+          side: "below",
+          status: "done",
+          tags: ["Personal cultivation"],
+          description: "Sesión para co-crear rutinas individuales y de equipo que íbamos a sostener durante el viaje, y una estrategia para medirlas. La conversación marco fue cómo balancear el bienestar individual con el cuidado de la team company.",
+          highlights: [
+            "Rutinas individuales por persona (sueño, ejercicio, escritura).",
+            "Rituales de equipo: planes semanales, limpieza dominical.",
+            "Plan de check con Irene sobre cómo tratar este ámbito durante la LJ."
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "phase-2",
+      label: "Fase 02",
+      title: "Durante la LJ",
+      dates: "19 ene → 18 abr 2026",
+      situation: {
+        kicker: "Situación del equipo",
+        text: "Necesitábamos conectar más como equipo dentro del viaje. Diseñamos planes de equipo semanales con responsables rotativos, donde cada plan se enfocaba a resolver un problema concreto que hubiera surgido esa semana en el equipo o en la empresa. Si no había problema, se hacía teambuilding puro."
+      },
+      dynamics: [
+        {
+          name: "Gymkhana de aterrizaje",
+          date: "Semana 13–25 ene",
+          side: "above",
+          status: "done",
+          tags: ["Teambuilding"],
+          description: "Plan de la primera semana en India. Una gymkhana para que el equipo se desbloqueara del jet-lag, se hiciera al espacio nuevo y se obligara a salir a interactuar con la ciudad y la gente local en formato juego.",
+          highlights: [
+            "Primer contacto colectivo con el entorno.",
+            "Romper la inercia de quedarse en casa el primer fin de semana.",
+            "Conexiones rápidas entre miembros del equipo."
+          ]
+        },
+        {
+          name: "Memorial de Gandhi",
+          date: "Semana 13–25 ene",
+          side: "below",
+          status: "done",
+          tags: ["Cultura"],
+          description: "Visita al memorial como plan de equipo cultural. Sirvió para entrar al contexto histórico y filosófico de India desde el primer momento, no solo como turistas.",
+          highlights: [
+            "Aterrizaje cultural compartido.",
+            "Conversación posterior sobre liderazgo y no-violencia.",
+            "Aplicación a nuestros propios conflictos del equipo."
+          ]
+        },
+        {
+          name: "Juego de la Cadena",
+          date: "Semana 26 ene – 1 feb",
+          side: "above",
+          status: "done",
+          tags: ["Conflicto", "Comunicación"],
+          description: "Esa semana, como equipo, tuvimos una conversación incómoda sobre un conflicto personal. Logramos resolverlo mediante un diálogo sincero y constructivo donde pudimos expresar nuestros sentimientos e identificar áreas de mejora. Como resultado, hemos superado el miedo a este tipo de conversaciones, creando un espacio seguro para compartir.",
+          highlights: [
+            "Resolución de un conflicto interpersonal real.",
+            "Espacio seguro instalado en el equipo.",
+            "Aumento de la sinceridad para futuras semanas."
+          ]
+        },
+        {
+          name: "Cena Kowa",
+          date: "Semana 26 ene – 1 feb",
+          side: "below",
+          status: "done",
+          tags: ["Teambuilding"],
+          description: "Plan de cierre de semana después de la conversación incómoda del Juego de la Cadena. La cena funcionó como ritual de reconciliación y celebración del paso adelante del equipo.",
+          highlights: [
+            "Cierre emocional positivo de una semana intensa.",
+            "Refuerzo de los lazos tras el conflicto resuelto."
+          ]
+        },
+        {
+          name: "Dinámica de Roles de Liderazgo",
+          date: "29 ene 2026",
+          side: "above",
+          status: "done",
+          tags: ["Liderazgo", "India action plan"],
+          description: "La dinámica de India partió de una reflexión individual sobre nuestro liderazgo, nuestro rol dentro del equipo y aquello que sentimos que aún nos falta desarrollar. Fue un ejercicio de introspección que salió muy bien, ya que todo el equipo se implicó de forma honesta y profunda.",
+          highlights: [
+            "Reflexión individual profunda sobre rol y liderazgo.",
+            "Definición de next steps integrados en el documento común de compromisos.",
+            "Liderazgo más consciente y aplicable dentro del equipo."
+          ],
+          conclusion: "En conjunto, la dinámica nos ayudó a alinear autoconocimiento y ejecución, convirtiendo el liderazgo en algo más consciente y aplicable dentro del equipo. Esta dinámica responde directamente a la situación detectada en la fase Antes de la LJ: que los miembros no eran del todo conscientes de su rol."
+        },
+        {
+          name: "Cena de equipo",
+          date: "Semana 2–8 feb",
+          side: "below",
+          status: "done",
+          tags: ["Teambuilding"],
+          description: "Como parte de nuestro esfuerzo continuo por fortalecer la dinámica del equipo, organizamos un plan enfocado en profundizar nuestros lazos y fomentar un mejor trabajo en equipo. Esta actividad se diseñó para ayudarnos a crecer juntos como un grupo cohesionado, promoviendo la comunicación, la confianza y la colaboración.",
+          highlights: [
+            "Conexiones más profundas entre miembros.",
+            "Conversaciones de calidad fuera del contexto de trabajo.",
+            "Refuerzo de los acuerdos del TLC en clave informal."
+          ]
+        },
+        {
+          name: "Sorpresa cumpleaños de Nerea",
+          date: "4 mar 2026",
+          side: "above",
+          status: "done",
+          tags: ["Teambuilding", "Corea"],
+          description: "Era la semana de aterrizaje y adaptación en Corea, y no hubo ningún problema, así que, como parte de un plan de equipo —ya que era el cumpleaños de Nerea—, le organizamos una fiesta sorpresa por la noche y lo celebramos durante el fin de semana en Hongdae.",
+          highlights: [
+            "Plan diseñado en una semana sin conflictos = teambuilding puro.",
+            "Cuidado individual visible para todo el equipo.",
+            "Aterrizaje suave en el segundo país."
+          ]
+        },
+        {
+          name: "Community Event en LEINN Seoul",
+          date: "5 mar 2026",
+          side: "below",
+          status: "done",
+          tags: ["Networking", "Corea"],
+          description: "Evento comunitario con la red de LEINN en Seúl. Sirvió para entrar al ecosistema local y abrir contactos para los proyectos del equipo.",
+          highlights: [
+            "Primera red de contactos en Corea.",
+            "Visibilidad de Rivia en el ecosistema LEINN global.",
+            "Conexión con coreanos que después aparecieron en proyectos."
+          ]
+        },
+        {
+          name: "Museo de la Guerra",
+          date: "7 mar 2026",
+          side: "above",
+          status: "done",
+          tags: ["Cultura", "Corea"],
+          description: "Visita cultural al Museo de la Guerra de Corea como plan de equipo. Contexto histórico imprescindible para entender la sociedad coreana actual y la mentalidad del entorno empresarial al que íbamos a vender.",
+          highlights: [
+            "Comprensión del contexto histórico coreano.",
+            "Conversación sobre identidad y trauma colectivo.",
+            "Aplicación al pitch y al tono con clientes locales."
+          ]
+        },
+        {
+          name: "Barbacoa en casa de Rivia",
+          date: "15 mar 2026",
+          side: "below",
+          status: "done",
+          tags: ["Teambuilding", "Comunidad"],
+          description: "Continuamos trabajando en los proyectos a diario, realizando visitas de cierre con los clientes. El domingo organizamos una barbacoa comunitaria en nuestra casa, abriendo el espacio a contactos locales.",
+          highlights: [
+            "Refuerzo de la red local invitándola a casa.",
+            "Plan de equipo en formato anfitrión.",
+            "Mezcla orgánica de trabajo y vida."
+          ]
+        },
+        {
+          name: "Barbacoa buffet coreana",
+          date: "22 mar 2026",
+          side: "above",
+          status: "done",
+          tags: ["Teambuilding"],
+          description: "Segunda barbacoa, esta vez en formato buffet coreano local. Plan de equipo para cerrar una semana intensa de cierres de proyecto.",
+          highlights: [
+            "Descompresión después de una semana fuerte.",
+            "Inmersión gastronómica como forma de aprendizaje cultural."
+          ]
+        },
+        {
+          name: "Korrika",
+          date: "27 mar 2026",
+          side: "below",
+          status: "done",
+          tags: ["Cultura vasca", "Identidad"],
+          description: "Plan especial para mantener viva la identidad vasca a 9.000 km de casa: la Korrika simbólica organizada por el equipo en Seúl.",
+          highlights: [
+            "Conexión con la identidad de origen en plena LJ.",
+            "Plan que combina cultura propia y comunidad expat.",
+            "Refuerzo del propósito y sentido (PERMA · M)."
+          ]
+        },
+        {
+          name: "Pop-Up de Secreto",
+          date: "28 mar 2026",
+          side: "above",
+          status: "done",
+          tags: ["Proyecto", "Validación"],
+          description: "Pop-up de uno de los proyectos del equipo en Seúl. Validación de modelo de negocio en mercado coreano en formato real.",
+          highlights: [
+            "Validación directa con clientes coreanos.",
+            "Resultados que alimentaron el regreso a España.",
+            "Plan de equipo y working day al mismo tiempo."
+          ]
+        },
+        {
+          name: "Evento Networking",
+          date: "2 abr 2026",
+          side: "below",
+          status: "done",
+          tags: ["Networking"],
+          description: "Evento de networking abierto para presentar Rivia y los proyectos a la red coreana de inversores y partners potenciales.",
+          highlights: [
+            "Contactos para la fase post-LJ.",
+            "Refuerzo de la marca empleadora de Rivia.",
+            "Práctica colectiva de pitch."
+          ]
+        },
+        {
+          name: "Juego de las Basuras",
+          date: "4 abr 2026",
+          side: "above",
+          status: "done",
+          tags: ["Co-living", "Comunicación"],
+          description: "Dinámica de equipo para resolver una fricción del co-living: el reparto de tareas de limpieza y basuras que se había desequilibrado. Convertimos el problema en juego con consecuencias divertidas pero claras.",
+          highlights: [
+            "Reequilibrio del reparto de tareas domésticas.",
+            "Aplicación del acuerdo TLC: quien no respeta, asume.",
+            "Cero rencillas tras la dinámica."
+          ]
+        },
+        {
+          name: "Dinámica de las Etiquetas",
+          date: "7 abr 2026",
+          side: "below",
+          status: "done",
+          tags: ["Identidad de equipo", "Empatía"],
+          description: "La dinámica de etiquetas nos permitió identificar, de forma anónima y colectiva, los comportamientos y percepciones que conviven en el equipo, sin señalar a personas concretas. A partir de las aportaciones filtramos y organizamos las etiquetas en bloques, lo que nos ayudó a darles sentido y a reflexionar sobre ellas. A nivel individual, cada persona pudo reconocerse en aquellas etiquetas con las que se identifica, fomentando una toma de conciencia honesta y sin juicios externos.",
+          highlights: [
+            "Mapeo anónimo de comportamientos del equipo.",
+            "Distinción entre lo que queremos eliminar y reforzar.",
+            "Auto-reconocimiento individual sin juicio externo."
+          ],
+          conclusion: "Aunque la dinámica no se cerró completamente por falta de tiempo, sí dejó una base clara. Como siguiente paso queda definir cómo vamos a actuar para transformar estas etiquetas en acciones concretas. La clave estará en asumir la responsabilidad personal sobre cómo contribuimos a reforzar o debilitar estas dinámicas en el día a día."
+        },
+        {
+          name: "Torneo FS",
+          date: "11 abr 2026",
+          side: "above",
+          status: "done",
+          tags: ["Teambuilding"],
+          description: "Torneo deportivo de cierre informal antes de la vuelta. Plan de descompresión con la red local.",
+          highlights: [
+            "Cierre emocional ligero del viaje.",
+            "Plan compartido con contactos locales coreanos."
+          ]
+        },
+        {
+          name: "Cena de equipo final",
+          date: "13 abr 2026",
+          side: "below",
+          status: "done",
+          tags: ["Cierre"],
+          description: "Cena de cierre del equipo en Seúl antes de la vuelta. Espacio para repasar aprendizajes, agradecer y dejar las cosas abiertas para el regreso.",
+          highlights: [
+            "Cierre simbólico del bloque DURANTE.",
+            "Compromisos verbales para la vuelta.",
+            "Preparación emocional para volver a España."
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "phase-3",
+      label: "Fase 03",
+      title: "Después de la LJ",
+      dates: "18 abr → 13 may 2026",
+      situation: {
+        kicker: "Situación del equipo",
+        text: "Nos faltaba tener un entendimiento del wellbeing como bloque de aprendizaje. Habíamos aplicado muchas prácticas de bienestar durante el viaje de forma inconsciente y necesitábamos sistematizarlas, medirlas y construir un marco que justificara nuestro trabajo de cara a las evaluaciones."
+      },
+      dynamics: [
+        {
+          name: "Formulario de Reflexión de Bienestar Post-Viaje",
+          date: "finales abr · may 2026",
+          side: "above",
+          status: "done",
+          tags: ["Medición", "Design Your Life"],
+          description: "Formulario aplicado a las 14 personas del equipo para medir el impacto del viaje en el bienestar individual y colectivo. Basado en la metodología Design Your Life. Es la pieza que demuestra el ROI emocional de toda la estrategia de Wellbeing.",
+          stats: [
+            { val: "+0.6", delta: "/10", label: "Energía media (6.6 → 7.2)" },
+            { val: "+1.7", delta: "/10", label: "Claridad mental (5.4 → 7.1)" },
+            { val: "7.9", delta: "/10", label: "Conexión con el grupo" },
+            { val: "7.2", delta: "/10", label: "Motivación general" }
+          ],
+          highlights: [
+            "14 participantes, 100% del equipo.",
+            "Estado emocional más frecuente al volver: Motivado/a (4) y Transformador/a (3).",
+            "Pilares de bienestar más citados: relaciones y salud física.",
+            "Hábitos descubiertos a mantener: tiempo en soledad, desconexión digital, escritura."
+          ],
+          conclusion: "El equipo regresa con mejoras claras en claridad mental, energía y motivación. Áreas a acompañar: María y Elisa con confusión emocional, Jonan con bajada de energía, y el uso del móvil como reto compartido de todo el equipo."
+        },
+        {
+          name: "Sharing · Economía del Cuidado",
+          date: "may 2026",
+          side: "below",
+          status: "done",
+          tags: ["Conocimiento", "Felipe y Leire"],
+          description: "Sharing en formato charla sobre economía del cuidado, preparado por Felipe y Leire. Pieza del bloque de conocimiento que justifica por qué el wellbeing es estratégico, no decorativo.",
+          highlights: [
+            "Marco económico del cuidado aplicado a startup.",
+            "Conexión con el modelo PERMA+4 de Seligman.",
+            "Apertura del bloque de conocimiento del equipo."
+          ]
+        },
+        {
+          name: "Sharing · Gestión Emocional de Equipos",
+          date: "may 2026",
+          side: "above",
+          status: "done",
+          tags: ["Conocimiento", "Libro"],
+          description: "Sharing sobre el libro de gestión emocional y profesional de equipos. Aplicación directa de los aprendizajes del viaje a un marco teórico.",
+          highlights: [
+            "Marco para nombrar lo que ya estábamos haciendo.",
+            "Herramientas concretas de gestión emocional.",
+            "Conexión con la dinámica de Etiquetas."
+          ]
+        },
+        {
+          name: "Diálogo · Interseccionalidad",
+          date: "may 2026",
+          side: "below",
+          status: "done",
+          tags: ["Diálogo", "Andreas"],
+          description: "Diálogo + dinámica sobre interseccionalidad, preparado por Andreas. Una de las primeras piezas del bloque empatía/diversidad que después se cierra con el workbook.",
+          highlights: [
+            "Marco interseccional aplicado al equipo.",
+            "Conexión con la Dinámica de Pre-juicios anterior."
+          ]
+        },
+        {
+          name: "Diálogo · Privilegios",
+          date: "may 2026",
+          side: "above",
+          status: "done",
+          tags: ["Diálogo", "Paula, Nerea, Elisa"],
+          description: "Diálogo + dinámica sobre privilegios, preparado por Paula, Nerea y Elisa. Reflexión sobre cómo nuestros privilegios condicionaron la mirada en India y Corea, y cómo los aplicamos a las decisiones de Rivia.",
+          highlights: [
+            "Introspección sobre privilegios individuales y colectivos.",
+            "Aplicación a la toma de decisiones de Rivia.",
+            "Continuidad de la introspección iniciada en pre-juicios."
+          ]
+        },
+        {
+          name: "Diálogo · Decolonialismo",
+          date: "may 2026",
+          side: "below",
+          status: "done",
+          tags: ["Diálogo", "Elisa y Garci"],
+          description: "Diálogo + dinámica sobre decolonialismo, preparado por Elisa y Garci. Cierra el bloque de diálogos críticos sobre nuestra mirada como equipo vasco/europeo que ha viajado a India y Corea.",
+          highlights: [
+            "Crítica a la mirada colonial del propio viaje.",
+            "Aplicación al diseño de proyectos post-LJ.",
+            "Base para el Empathy & Diversity Workbook."
+          ]
+        },
+        {
+          name: "Investigación aplicada a Rivia",
+          date: "may 2026",
+          side: "above",
+          status: "done",
+          tags: ["Research", "Justificación estratégica"],
+          description: "Investigación de fondo sobre por qué el cuidado de las personas en las empresas es importante, qué aporta, por qué se aplica en grandes empresas, si se puede hacer en pequeñas y qué limitaciones existen. Documento que justifica estratégicamente el rol de Wellbeing dentro de Rivia.",
+          highlights: [
+            "PERMA+4 como marco operativo para startups.",
+            "ROI documentado: 2x–3x en empresas pequeñas bien gestionadas.",
+            "PYMES tienen mejor bienestar percibido que grandes empresas.",
+            "Riesgo País Vasco: niveles más bajos de bienestar laboral en CCAA → margen de diferenciación."
+          ],
+          conclusion: "Para una startup como Rivia, el bienestar no es una versión reducida del de las grandes empresas; es un bienestar diferente que apalanca la cercanía, el propósito y el liderazgo directo en lugar del presupuesto. Bien hecho, mejora la productividad un 20%, reduce la rotación un tercio y devuelve entre 2x y 5x lo invertido."
+        }
+      ]
+    },
+
+    {
+      id: "phase-4",
+      label: "Fase 04",
+      title: "Actualmente",
+      dates: "13 may → 3 jun 2026",
+      situation: {
+        kicker: "Situación del equipo",
+        text: "Tras el Strategy Day (13 may) entramos en la fase final del curso: aterrizar lo trabajado en formato evaluable y cerrar las piezas pendientes. Lo que queda por completar es el Empathy and Diversity Workbook, que cierra el bloque de diálogos críticos del bloque anterior."
+      },
+      dynamics: [
+        {
+          name: "Plan Estratégico de Wellbeing (Miro)",
+          date: "13 may 2026",
+          side: "above",
+          status: "done",
+          tags: ["Estrategia", "Cierre"],
+          description: "Plan estratégico del bloque de wellbeing aterrizado en Miro tras el Strategy Day. Análisis de cómo está la empresa, proyección y plan de tareas concretas para los próximos meses.",
+          highlights: [
+            "Análisis · proyección · plan concreto.",
+            "Tablero accesible para todo el equipo.",
+            "Insumo directo para las evaluaciones del 3 de junio."
+          ]
+        },
+        {
+          name: "Feedback aleatorio · check-out de TS",
+          date: "cada 2 semanas",
+          side: "below",
+          status: "done",
+          tags: ["Sinceridad", "Continuo"],
+          description: "Una TS cada dos semanas, a modo de check-out, se hacen parejas aleatorias para darse feedback. Mecánica diseñada para forzar la mejora en sinceridad detectada como reto post-viaje.",
+          highlights: [
+            "Parejas aleatorias = se rompen los pares habituales.",
+            "Plantilla común: objetivos, forma de trabajar, comunicación.",
+            "Cada feedback cierra con una fortaleza y una mejora accionable."
+          ]
+        },
+        {
+          name: "Empathy & Diversity Workbook",
+          date: "por completar antes del 3 jun",
+          side: "above",
+          status: "pending",
+          tags: ["Pendiente", "Empatía", "Diversidad"],
+          description: "Workbook que cierra el bloque de diálogos críticos (interseccionalidad, privilegios, decolonialismo). Es la pieza que falta para tener todo el bloque empatía/diversidad sistematizado de cara a las evaluaciones.",
+          highlights: [
+            "Cierra el bloque de diálogos del DESPUÉS.",
+            "Aterriza los aprendizajes en formato workbook reutilizable.",
+            "Pieza pendiente reconocida en el plan estratégico de Miro."
+          ],
+          conclusion: "Es la única pieza del año que queda pendiente. Su finalización antes del 3 de junio cierra el círculo completo de la estrategia de Wellbeing del curso 2025–2026."
+        },
+        {
+          name: "Evaluaciones anuales",
+          date: "3 jun 2026",
+          side: "below",
+          status: "done",
+          tags: ["Hito"],
+          description: "Hito final del curso. Las evaluaciones anuales son el momento en el que se presenta todo el trabajo del equipo de Wellbeing del año.",
+          highlights: [
+            "Cierre del curso 2025–2026.",
+            "Presentación de toda la estrategia y resultados.",
+            "Este timeline es la herramienta de apoyo a la presentación."
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+</script>
+<script>
+// Wellbeing Timeline · render + interaction
+
+(function () {
+  const data = window.TIMELINE_DATA;
+  const tl = document.getElementById('timeline');
+  const wrap = document.getElementById('timelineWrap');
+  const overlay = document.getElementById('detailOverlay');
+  const panel = document.getElementById('detailPanel');
+  const detailHead = document.getElementById('detailHead');
+  const detailBody = document.getElementById('detailBody');
+  const closeBtn = document.getElementById('closeBtn');
+
+  // ---------- Render timeline ----------
+  // pre-line spacer
+  const pre = document.createElement('div');
+  pre.className = 'pre-line';
+  tl.appendChild(pre);
+
+  data.phases.forEach((phase, idx) => {
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'phase';
+    phaseEl.id = phase.id;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'phase-header';
+    header.innerHTML = `
+      <div class="phase-label">${phase.label}</div>
+      <div class="phase-title">${phase.title}</div>
+      <div class="phase-dates">${phase.dates}</div>
+    `;
+    phaseEl.appendChild(header);
+
+    // Situation box
+    const sit = document.createElement('div');
+    sit.className = 'phase-situation';
+    sit.innerHTML = `<strong>${phase.situation.kicker}</strong>${phase.situation.text}`;
+    phaseEl.appendChild(sit);
+
+    // Track with above/below markers
+    const track = document.createElement('div');
+    track.className = 'track';
+
+    const above = document.createElement('div');
+    above.className = 'markers above';
+
+    const below = document.createElement('div');
+    below.className = 'markers below';
+
+    phase.dynamics.forEach((dyn, dIdx) => {
+      const m = buildMarker(dyn, phase, dIdx);
+      if (dyn.side === 'below') below.appendChild(m);
+      else above.appendChild(m);
+    });
+
+    // tick divider between phases
+    if (idx < data.phases.length - 1) {
+      const tick = document.createElement('div');
+      tick.className = 'tick-divider';
+      track.appendChild(tick);
+    }
+
+    track.appendChild(above);
+    track.appendChild(below);
+    phaseEl.appendChild(track);
+
+    tl.appendChild(phaseEl);
+  });
+
+  // post-line spacer
+  const post = document.createElement('div');
+  post.className = 'post-line';
+  tl.appendChild(post);
+
+  function buildMarker(dyn, phase, idx) {
+    const el = document.createElement('div');
+    el.className = 'dynamic' + (dyn.status === 'pending' ? ' pending' : '');
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', `${dyn.name} — ${dyn.date}`);
+
+    const labelHTML = `
+      <div class="label">
+        <div class="label-date mono">${dyn.date}</div>
+        <div class="label-name">${dyn.name}</div>
+        ${dyn.status === 'pending' ? '<div class="pending-tag">Por hacer</div>' : ''}
+      </div>
+    `;
+    const stemHTML = `<div class="stem-wrap"><div class="stem"></div><div class="dot"></div></div>`;
+
+    if (dyn.side === 'below') {
+      el.innerHTML = stemHTML + labelHTML;
+    } else {
+      el.innerHTML = labelHTML + stemHTML;
+    }
+
+    const open = () => openDetail(dyn, phase);
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+
+    return el;
+  }
+
+  // ---------- Detail panel ----------
+  function openDetail(dyn, phase) {
+    const isPending = dyn.status === 'pending';
+    const statusLabel = isPending ? 'Por hacer' : 'Completado';
+
+    detailHead.innerHTML = `
+      <div class="meta">
+        <span class="status ${isPending ? 'pending' : ''}">${statusLabel}</span>
+        <span class="mono">${dyn.date}</span>
+      </div>
+      <h2>${dyn.name}</h2>
+      <div class="phase-tag mono">${phase.label.toUpperCase()} · ${phase.title.toUpperCase()}</div>
+    `;
+
+    let bodyHTML = '';
+
+    if (dyn.tags && dyn.tags.length) {
+      // (tags rendered inline in head meta above optionally — keeping body cleaner)
+    }
+
+    bodyHTML += `
+      <section>
+        <h3>¿Qué fue?</h3>
+        <p>${dyn.description}</p>
+      </section>
+    `;
+
+    if (dyn.stats && dyn.stats.length) {
+      bodyHTML += `
+        <section>
+          <h3>Resultados medidos</h3>
+          <div class="stat-grid">
+            ${dyn.stats.map(s => `
+              <div class="stat">
+                <div><span class="stat-val">${s.val}</span>${s.delta ? `<span class="stat-delta">${s.delta}</span>` : ''}</div>
+                <div class="stat-label">${s.label}</div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    if (dyn.highlights && dyn.highlights.length) {
+      bodyHTML += `
+        <section>
+          <h3>${dyn.stats ? 'Notas clave' : 'Lo que dejó'}</h3>
+          <ul>${dyn.highlights.map(h => `<li>${h}</li>`).join('')}</ul>
+        </section>
+      `;
+    }
+
+    if (dyn.conclusion) {
+      bodyHTML += `
+        <section>
+          <h3>Conclusión / Aplicación</h3>
+          <p>${dyn.conclusion}</p>
+        </section>
+      `;
+    }
+
+    if (dyn.tags && dyn.tags.length) {
+      bodyHTML += `
+        <section>
+          <h3>Etiquetas</h3>
+          <p class="mono" style="font-size:11.5px;letter-spacing:0.04em;color:var(--ink-mute);">
+            ${dyn.tags.map(t => `· ${t}`).join('  ')}
+          </p>
+        </section>
+      `;
+    }
+
+    detailBody.innerHTML = bodyHTML;
+    detailBody.scrollTop = 0;
+
+    overlay.classList.add('open');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetail() {
+    overlay.classList.remove('open');
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  overlay.addEventListener('click', closeDetail);
+  closeBtn.addEventListener('click', closeDetail);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDetail();
+  });
+
+  // ---------- Phase nav ----------
+  document.querySelectorAll('#phaseNav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      if (!target) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const tgtRect = target.getBoundingClientRect();
+      const scrollLeft = wrap.scrollLeft + (tgtRect.left - wrapRect.left) - 24;
+      wrap.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    });
+  });
+
+  // ---------- Toolbar controls ----------
+  document.getElementById('resetView').addEventListener('click', () => {
+    wrap.scrollTo({ left: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('expandAll').addEventListener('click', () => {
+    // open a "summary view" — quick navigable list using the detail panel
+    const allDyns = data.phases.flatMap(p => p.dynamics.map(d => ({ d, p })));
+    detailHead.innerHTML = `
+      <div class="meta">
+        <span class="status">Resumen</span>
+        <span class="mono">${allDyns.length} dinámicas · 2025–2026</span>
+      </div>
+      <h2>Índice cronológico completo</h2>
+      <div class="phase-tag mono">TODAS LAS FASES</div>
+    `;
+    let html = '';
+    data.phases.forEach(phase => {
+      html += `
+        <section>
+          <h3>${phase.label} · ${phase.title}<span class="mono" style="margin-left:8px;color:var(--ink-mute);font-weight:400;text-transform:none;letter-spacing:0.02em;">${phase.dates}</span></h3>
+          <ul>
+            ${phase.dynamics.map(d => `
+              <li>
+                <a href="#" data-dyn="${encodeURIComponent(d.name)}" data-phase="${phase.id}" style="color:var(--ink);text-decoration:none;font-weight:500;">${d.name}</a>
+                <span class="mono" style="font-size:11px;color:var(--ink-mute);margin-left:8px;">${d.date}</span>
+                ${d.status === 'pending' ? '<span class="mono" style="font-size:9.5px;color:var(--accent-pending);margin-left:8px;text-transform:uppercase;letter-spacing:0.12em;">· por hacer</span>' : ''}
+              </li>
+            `).join('')}
+          </ul>
+        </section>
+      `;
+    });
+    detailBody.innerHTML = html;
+    detailBody.scrollTop = 0;
+    overlay.classList.add('open');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    // wire links
+    detailBody.querySelectorAll('a[data-dyn]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const name = decodeURIComponent(a.dataset.dyn);
+        const phaseId = a.dataset.phase;
+        const phase = data.phases.find(p => p.id === phaseId);
+        const dyn = phase && phase.dynamics.find(d => d.name === name);
+        if (dyn && phase) openDetail(dyn, phase);
+      });
+    });
+  });
+
+  // ---------- Hide scroll hint after scroll ----------
+  let scrolled = false;
+  wrap.addEventListener('scroll', () => {
+    if (!scrolled && wrap.scrollLeft > 80) {
+      scrolled = true;
+      const hint = document.querySelector('.scroll-hint');
+      if (hint) {
+        hint.style.transition = 'opacity 0.4s ease';
+        hint.style.opacity = '0';
+        setTimeout(() => hint.remove(), 500);
+      }
+    }
+  });
+
+})();
+
+</script>
+
+</body>
+</html>
+
+<style id="__om-edit-overrides">
+#phase-2 [aria-label="Sorpresa cumpleaños de Nerea — 4 mar 2026"] >.label { background-color: rgb(0, 0, 0) !important }
+#phase-2 [aria-label="Sorpresa cumpleaños de Nerea — 4 mar 2026"] >.label { background-color: rgb(255, 255, 255) !important }
+#phase-2 [aria-label="Sorpresa cumpleaños de Nerea — 4 mar 2026"] >.label { background-color: rgb(255, 255, 255) !important }
+#phase-2 .above { color: rgb(0, 0, 0) !important }
+#phase-2 .above { color: rgb(66, 135, 199) !important }
+#phase-2 .above { color: rgb(207, 50, 50) !important }
+#phase-2 .above { color: rgb(255, 255, 255) !important }
+</style>
